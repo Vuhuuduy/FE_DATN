@@ -16,6 +16,9 @@ import ProductsUpdate from "@/pages/products/products.update.pages";
 import Orders from "@/pages/orders/orders";
 import OrderList from "@/pages/orders/orders";
 import OrderDetailPage from "@/pages/orders/orderDetail";
+import AddVariant from "@/pages/variants/variantsAdd";
+import VariantsList from "@/pages/variants/variants";
+import UpdateVariant from "@/pages/variants/variantsUpdate";
 const Routers = () => {
   const isAuthenticated = true;
 
@@ -46,6 +49,10 @@ const Routers = () => {
         <Route path="/orders" element={<Orders />} />
         <Route path="/orders/list" element={<OrderList />} />
         <Route path="/orders/:id" element={<OrderDetailPage />} />
+
+        <Route path="/variants" element={<VariantsList />} />
+        <Route path="/variants/add" element={<AddVariant />} />
+        <Route path="/variants/:id/edit" element={<UpdateVariant />} />
       </Route>
     </Routes>
   );
