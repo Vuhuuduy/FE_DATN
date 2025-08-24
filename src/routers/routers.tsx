@@ -13,6 +13,9 @@ import Comments from "@/pages/comment/comment";
 import ProductsAdd from "@/pages/products/products.add.pages";
 import ProductsPage from "@/pages/products/products";
 import ProductsUpdate from "@/pages/products/products.update.pages";
+import Orders from "@/pages/orders/orders";
+import OrderList from "@/pages/orders/orders";
+import OrderDetailPage from "@/pages/orders/orderDetail";
 const Routers = () => {
   const isAuthenticated = true;
 
@@ -39,6 +42,10 @@ const Routers = () => {
         <Route path="/products/add" element={<ProductsAdd />} />
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/products/update/:id" element={<ProductsUpdate />} />
+
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/orders/list" element={<OrderList />} />
+        <Route path="/orders/:id" element={<OrderDetailPage />} />
       </Route>
     </Routes>
   );
