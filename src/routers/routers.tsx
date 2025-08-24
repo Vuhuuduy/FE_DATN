@@ -9,6 +9,7 @@ import DiscountsAdd from "@/pages/discounts/discounts.add.pages";
 import DiscountsUpdate from "@/pages/discounts/discounts.update.pages";
 import Users from "@/pages/users/UserPage";
 import AdminUserPage from "@/pages/users/user";
+import Comments from "@/pages/comment/comment";
 const Routers = () => {
   const isAuthenticated = true;
 
@@ -30,6 +31,7 @@ const Routers = () => {
 
         <Route path="/users" element={<Users />} />
         <Route path="/user" element={<AdminUserPage />} />
+        <Route path="/comments" element={<Comments />} />
       </Route>
     </Routes>
   );
