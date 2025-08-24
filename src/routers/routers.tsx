@@ -10,6 +10,9 @@ import DiscountsUpdate from "@/pages/discounts/discounts.update.pages";
 import Users from "@/pages/users/UserPage";
 import AdminUserPage from "@/pages/users/user";
 import Comments from "@/pages/comment/comment";
+import ProductsAdd from "@/pages/products/products.add.pages";
+import ProductsPage from "@/pages/products/products";
+import ProductsUpdate from "@/pages/products/products.update.pages";
 const Routers = () => {
   const isAuthenticated = true;
 
@@ -32,6 +35,10 @@ const Routers = () => {
         <Route path="/users" element={<Users />} />
         <Route path="/user" element={<AdminUserPage />} />
         <Route path="/comments" element={<Comments />} />
+
+        <Route path="/products/add" element={<ProductsAdd />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products/update/:id" element={<ProductsUpdate />} />
       </Route>
     </Routes>
   );
