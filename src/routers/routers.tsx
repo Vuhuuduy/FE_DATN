@@ -7,7 +7,8 @@ import EditCategory from "@/pages/categories/editCategories";
 import Discounts from "@/pages/discounts/discounts";
 import DiscountsAdd from "@/pages/discounts/discounts.add.pages";
 import DiscountsUpdate from "@/pages/discounts/discounts.update.pages";
-
+import Users from "@/pages/users/UserPage";
+import AdminUserPage from "@/pages/users/user";
 const Routers = () => {
   const isAuthenticated = true;
 
@@ -26,6 +27,9 @@ const Routers = () => {
         <Route path="/discounts" element={<Discounts />} />
         <Route path="/discounts/add" element={<DiscountsAdd />} />
         <Route path="/discounts/update/:id" element={<DiscountsUpdate />} />
+
+        <Route path="/users" element={<Users />} />
+        <Route path="/user" element={<AdminUserPage />} />
       </Route>
     </Routes>
   );
