@@ -146,9 +146,7 @@ const ProductsUpdate = () => {
       <Form.Item label="Giá" name="price" rules={[{ required: true }]}>
         <InputNumber style={{ width: "100%" }} min={0} />
       </Form.Item>
-      <Form.Item label="Số lượng sản phẩm chính" name="stock" rules={[{ required: true, message: "Vui lòng nhập số lượng sản phẩm chính" }]}>
-        <InputNumber style={{ width: "100%" }} min={0} />
-      </Form.Item>
+    
 
       <Form.Item label="Ảnh">
         <Upload
