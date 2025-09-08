@@ -54,6 +54,7 @@ const Routers = () => {
         <Route path="/variants/add" element={<AddVariant />} />
         <Route path="/variants/:id/edit" element={<UpdateVariant />} />
       </Route>
+      
     </Routes>
   );
 };
