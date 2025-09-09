@@ -1,12 +1,32 @@
-import { Table, Tag, Space, Typography, Dropdown, Button, Tooltip, App } from "antd";
-import { EyeOutlined, DownOutlined } from "@ant-design/icons";
+import {
+  Table,
+  Tag,
+  Space,
+  Typography,
+  Dropdown,
+  Button,
+  Tooltip,
+  App,
+  Input,
+  Row,
+  Col,
+  Select,
+} from "antd";
+import { EyeOutlined, DownOutlined, SearchOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { IOrder } from "@/types/order";
-import { getStatusTagColor, ORDER_STATUS, ORDER_STATUS_FLOW, getPaymentStatusTagColor } from "./ordersContant";
+import {
+  getStatusTagColor,
+  ORDER_STATUS,
+  ORDER_STATUS_FLOW,
+  getPaymentStatusTagColor,
+} from "./ordersContant";
 import { useNavigate } from "react-router";
+import { useState } from "react";
 
 const { Text } = Typography;
+const { Option } = Select;
 
 // ✅ Thêm list trạng thái thanh toán
 const PAYMENT_STATUS = [
@@ -31,6 +51,10 @@ const OrderList = () => {
     queryFn: fetchOrders,
   });
 
+  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | undefined>();
+  const [paymentFilter, setPaymentFilter] = useState<string | undefined>();
+
   const getStatusLabel = (statusKey: string) => {
     const status = ORDER_STATUS.find((s) => s.key === statusKey);
     return status ? status.label : statusKey;
@@ -44,26 +68,28 @@ const OrderList = () => {
       return "Đã thanh toán";
     }
     if (method === "cod") {
-      return record.status === "Đã hoàn thành" ? "Đã thanh toán" : "Chưa thanh toán";
+      return record.status === "Đã hoàn thành"
+        ? "Đã thanh toán"
+        : "Chưa thanh toán";
     }
     return "Chưa thanh toán";
   };
 
-  const handleChangeStatus = async (record: IOrder, statusKey: string, label: string) => {
-    // ====== VALIDATE ======
+  const handleChangeStatus = async (
+    record: IOrder,
+    statusKey: string,
+    label: string
+  ) => {
     if (statusKey === "Đã hủy") {
       if (!["Chờ xác nhận", "Đã xác nhận"].includes(record.status)) {
-        message.warning("Chỉ có thể hủy đơn khi đang ở 'Chờ xác nhận' hoặc 'Đã xác nhận'");
+        message.warning(
+          "Chỉ có thể hủy đơn khi đang ở 'Chờ xác nhận' hoặc 'Đã xác nhận'"
+        );
         return;
       }
     }
 
-    const reason =
-      statusKey === "Đã hủy"
-        ? "Huỷ bởi admin"
-        : // : statusKey === "Đã hoàn tiền"
-          // ? "Hoàn tiền bởi admin"
-          undefined;
+    const reason = statusKey === "Đã hủy" ? "Huỷ bởi admin" : undefined;
 
     try {
       const token = localStorage.getItem("token");
@@ -80,6 +106,40 @@ const OrderList = () => {
       message.error("Cập nhật trạng thái thất bại");
     }
   };
+
+  // ✅ Lọc dữ liệu ở client
+  const filteredData =
+    data
+      ?.filter((order) => {
+        // Lọc theo search (tên, email, mã đơn)
+        const searchStr = searchText.toLowerCase();
+        const orderId = order._id?.slice(-6).toLowerCase();
+        const fullname = order.userId?.fullname?.toLowerCase() || "";
+        const email = order.userId?.email?.toLowerCase() || "";
+        if (
+          searchText &&
+          !(
+            fullname.includes(searchStr) ||
+            email.includes(searchStr) ||
+            orderId.includes(searchStr)
+          )
+        ) {
+          return false;
+        }
+
+        // Lọc theo trạng thái đơn
+        if (statusFilter && order.status !== statusFilter) return false;
+
+        // Lọc theo trạng thái thanh toán
+        if (paymentFilter && getPaymentStatus(order) !== paymentFilter)
+          return false;
+
+        return true;
+      })
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      ) ?? [];
 
   const columns = [
     {
@@ -128,26 +188,37 @@ const OrderList = () => {
         }
       },
     },
-    // ✅ Cột mới: Trạng thái thanh toán (ép từ frontend)
     {
       title: "Trạng thái thanh toán",
       key: "paymentStatus",
       render: (_: any, record: IOrder) => {
         const value = getPaymentStatus(record);
         const status = PAYMENT_STATUS.find((s) => s.key === value);
-        return <Tag color={getPaymentStatusTagColor(value)}>{status ? status.label : value}</Tag>;
+        return (
+          <Tag color={getPaymentStatusTagColor(value)}>
+            {status ? status.label : value}
+          </Tag>
+        );
       },
     },
     {
       title: "Lý do hủy",
       key: "cancelReason",
-      render: (_: any, record: IOrder) => (record.status === "Đã hủy" ? <Text type="danger">{record.cancelReason || "Không có"}</Text> : "-"),
+      render: (_: any, record: IOrder) =>
+        record.status === "Đã hủy" ? (
+          <Text type="danger">{record.cancelReason || "Không có"}</Text>
+        ) : (
+          "-"
+        ),
     },
-
     {
       title: "Trạng thái",
       key: "status",
-      render: (_: any, record: IOrder) => <Tag color={getStatusTagColor(record.status)}>{getStatusLabel(record.status)}</Tag>,
+      render: (_: any, record: IOrder) => (
+        <Tag color={getStatusTagColor(record.status)}>
+          {getStatusLabel(record.status)}
+        </Tag>
+      ),
     },
     {
       title: "Hành động",
@@ -158,16 +229,12 @@ const OrderList = () => {
         const menuItems = ORDER_STATUS.filter((status) => {
           const newIndex = ORDER_STATUS_FLOW.indexOf(status.key);
           const isCancelled = status.key === "Đã hủy";
-          // const isRefunded = status.key === "Đã hoàn tiền";
-          const canCancel = ["Chờ xác nhận", "Đã xác nhận"].includes(record.status);
-
-          // 🚫 Chỉ cho phép chọn trạng thái liền kề tiếp theo
+          const canCancel = ["Chờ xác nhận", "Đã xác nhận"].includes(
+            record.status
+          );
           const isNextStep = newIndex === currentIndex + 1;
-
-          // ✅ Quy tắc cho hủy và hoàn tiền
           if (isCancelled && canCancel) return true;
           if (record.status === "Đã giao hàng") return true;
-
           return isNextStep;
         }).map((status) => ({
           key: status.key,
@@ -178,7 +245,10 @@ const OrderList = () => {
         return (
           <Space size="middle">
             <Tooltip title="Xem chi tiết">
-              <Button icon={<EyeOutlined />} onClick={() => nav(`/orders/${record._id}`)} />
+              <Button
+                icon={<EyeOutlined />}
+                onClick={() => nav(`/orders/${record._id}`)}
+              />
             </Tooltip>
             {menuItems.length > 0 && (
               <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
@@ -196,7 +266,60 @@ const OrderList = () => {
   if (isLoading) return <p>Đang tải dữ liệu...</p>;
   if (error) return <p>Lỗi khi tải đơn hàng</p>;
 
-  return <Table rowKey="_id" dataSource={[...(data ?? [])].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())} columns={columns} pagination={{ pageSize: 5 }} />;
+  return (
+    <>
+      {/* Bộ lọc */}
+      <Row gutter={16} style={{ marginBottom: 16 }}>
+        <Col span={8}>
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="Tìm theo tên, email, mã đơn"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            allowClear
+          />
+        </Col>
+        <Col span={8}>
+          <Select
+            placeholder="Lọc theo trạng thái đơn"
+            style={{ width: "100%" }}
+            allowClear
+            value={statusFilter}
+            onChange={(v) => setStatusFilter(v)}
+          >
+            {ORDER_STATUS.map((s) => (
+              <Option key={s.key} value={s.key}>
+                {s.label}
+              </Option>
+            ))}
+          </Select>
+        </Col>
+        <Col span={8}>
+          <Select
+            placeholder="Lọc theo trạng thái thanh toán"
+            style={{ width: "100%" }}
+            allowClear
+            value={paymentFilter}
+            onChange={(v) => setPaymentFilter(v)}
+          >
+            {PAYMENT_STATUS.map((s) => (
+              <Option key={s.key} value={s.key}>
+                {s.label}
+              </Option>
+            ))}
+          </Select>
+        </Col>
+      </Row>
+
+      {/* Bảng */}
+      <Table
+        rowKey="_id"
+        dataSource={filteredData}
+        columns={columns}
+        pagination={{ pageSize: 5 }}
+      />
+    </>
+  );
 };
 
 export default OrderList;
