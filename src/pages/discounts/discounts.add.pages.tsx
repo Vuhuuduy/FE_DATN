@@ -24,6 +24,7 @@ export default function DiscountsAdd() {
         ...values,
         discount_value: Number(values.discount_value),
         minOrderValue: Number(values.minOrderValue),
+        maxDiscountValue: Number(values.maxDiscountValue),
         date: values.date?.map((d: any) => d.toISOString()) || [],
       }
 
@@ -83,12 +84,38 @@ export default function DiscountsAdd() {
           <Form.Item
             label="Giá trị giảm (%)"
             name="discount_value"
-            rules={[{ required: true, message: 'Vui lòng nhập giá trị' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập giá trị' },
+              {
+                validator: (_, value) => {
+                  if (value === undefined || value === null || value === '') {
+                    return Promise.resolve()
+                  }
+                  if (value <= 0) {
+                    return Promise.reject('Giá trị phải lớn hơn 0')
+                  }
+                  if (value > 100) {
+                    return Promise.reject('Giá trị không được vượt quá 100%')
+                  }
+                  return Promise.resolve()
+                },
+              },
+            ]}
           >
             <Input type="number" placeholder="VD: 15" />
           </Form.Item>
+
         </Col>
       </Row>
+
+      {/* Giảm giá tối đa */}
+      <Form.Item
+        label="Giảm giá tối đa (VNĐ)"
+        name="maxDiscountValue"
+        rules={[{ required: true, message: 'Vui lòng nhập giá trị tối đa' }]}
+      >
+        <Input type="number" placeholder="VD: 200000" />
+      </Form.Item>
 
       {/* Đơn hàng tối thiểu */}
       <Form.Item

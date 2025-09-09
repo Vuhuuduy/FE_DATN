@@ -4,6 +4,7 @@ export interface IDiscounts {
   discount_type: '%' | 'vnd'
   discount_value: number
   minOrderValue: number
+  maxDiscountValue: number
   date: string[]
   status: 'active' | 'inactive'
   
