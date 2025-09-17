@@ -6,7 +6,9 @@ import {
   Popconfirm,
   Tag,
   message,
+  Input,
 } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import { ColumnsType } from "antd/es/table";
 import { IComment, IReply } from "@/types/comment";
 import api from "@/config/axios.customize";
@@ -164,6 +166,18 @@ export default function CommentPage() {
   return (
     <div>
       <h2 className="text-xl mb-4">Quản lý bình luận</h2>
+
+      {/* Thanh tìm kiếm */}
+      <div style={{ marginBottom: 16 }}>
+        <Input
+          placeholder="Tìm kiếm bình luận..."
+          prefix={<SearchOutlined />}
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          allowClear
+          style={{ width: 300 }}
+        />
+      </div>
 
       {/* Bảng bình luận gốc */}
       <Table
